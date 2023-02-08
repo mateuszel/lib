@@ -1,0 +1,53 @@
+#include <iostream>
+#include <vector>
+#include <unordered_set>
+#include <algorithm>
+using namespace std;
+
+const int MAXN = 1e6+1;
+
+vector <int> in[MAXN], out[MAXN], scc[MAXN], order;
+unordered_set<int> cg[MAXN];
+int wh[MAXN]; // w ktorej spojnej jest i
+bool odw[MAXN];
+
+void dfs1(int v){
+	odw[v] = true;
+	for (auto x : out[v]){
+		if (!odw[x]) dfs1(x);
+	}
+	order.push_back(v);
+}
+
+void dfs2(int v, int i){
+	odw[v] = true;
+	scc[i].push_back(v);
+	wh[v] = i;
+	for (auto x : in[v]){
+		if (!odw[x]) dfs2(x, i);
+	}
+}
+
+void fscc(int n){
+	for (int i=1; i<=n; i++) if (!odw[i]) dfs1(i);
+	for (int i=1; i<=n; i++) odw[i] = false;
+	reverse(order.begin(), order.end());
+	
+	int cnt=0;
+	for (auto x : order){
+		if (!odw[x]){
+			cnt++;
+			dfs2(x, cnt);
+		}
+	}
+} 
+
+void build_cg(int n){
+	for (int s=1; s<=n; s++){
+		for (auto w : scc[s]){
+			for (auto x : out[w]){
+				if (wh[x]!=s) cg[s].insert(wh[x]);
+			}
+		}
+	}
+}
